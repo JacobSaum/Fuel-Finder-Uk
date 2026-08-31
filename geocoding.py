@@ -1,5 +1,5 @@
 import requests
-from math import radians, degrees, cos
+from math import radians, asin, cos, sin, sqrt
 
 def getLocationFromPostcode(post):
     response = requests.get(f"https://api.postcodes.io/postcodes/{post}",)
@@ -14,27 +14,17 @@ def getLongAndLat(pfs_data):
     latitude = pfs_data["latitude"]
     return longitude, latitude
 
-def getMaxBounds(lat, lon, radius_miles):
-    EARTH_RADIUS_MILES = 3958.8
+def getDistBetweenTwoLocations(lat1, lon1, lat2, lon2):
+    R = 3958.8
     
-    angular_radius = radius_miles / EARTH_RADIUS_MILES
+    dlat = radians(lat2 - lat1)
+    dlon = radians(lon2 - lon1)
+    lat1 = radians(lat1)
+    lat2 = radians(lat2)
     
-    delta_lat = degrees(angular_radius)
+    a = sin(dlat / 2)**2 + cos(lat1) * cos(lat2) * sin(dlon / 2)**2
+    c = 2 * asin(sqrt(a))
     
-    lat_rad = radians(lat)
-    delta_lon = degrees(angular_radius / max(cos(lat_rad), 1e-7))
-    
-    min_lat = lat - delta_lat
-    max_lat = lat + delta_lat
-    min_lon = lon - delta_lon
-    max_lon = lon + delta_lon
-    
-    return {
-        "min_latitude": round(min_lat, 6),
-        "max_latitude": round(max_lat, 6),
-        "min_longitude": round(min_lon, 6),
-        "max_longitude": round(max_lon, 6)
-    }
-
+    return R * c
 
 def getNearbyStations():
