@@ -1,4 +1,3 @@
-#downloads csv file, parses, loads it into sqlite
 
 import sqlite3
 import csv
