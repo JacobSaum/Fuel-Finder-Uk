@@ -6,18 +6,17 @@ cur = conn.cursor()
 # gets simplified version of data with only fuel prices and id
 def getStationData():
     cur.execute("""
-        SELECT pfs_id, e5_price, e10_price, b7s_price, b7p_price
+        SELECT pfs_id, brand_name, e5_price, e10_price, b7s_price, b7p_price
         FROM pfs_data
         WHERE perm_closure == 0 AND temp_closure == 0
     """)
     return cur.fetchall()
 
-# maps column number to fuel type
 FUEL_COLUMNS = {
-    "e5": 1,
-    "e10": 2,
-    "b7s": 3,
-    "b7p": 4
+    "e5": 2,
+    "e10": 3,
+    "b7s": 4,
+    "b7p": 5
 }
 
 # sorts price by fuel type
@@ -33,23 +32,12 @@ def sortFuelPrice(fuelSortType, stationData):
         if isinstance(value, (int, float)):
             priced.append(row)
         elif isinstance(value, str) and value.strip() != "":
-
             try:
                 converted = float(value)
                 new_row = row[:col_index] + (converted,) + row[col_index + 1:]
                 priced.append(new_row)
             except ValueError:
-                continue 
-    
-    fuelPriceSortingLogic(sorted(priced, key=lambda row: row[col_index]), fuelSortType)
+                continue
 
-def fuelPriceSortingLogic(sortedStations, fuelSortType):
+    return sorted(priced, key=lambda row: row[col_index])
     
-    for x in range(len(sortedStations)):
-        station_id = sortedStations[x][0]
-        cur.execute(f"""
-                    SELECT pfs_id, {fuelSortType}_price
-                    FROM pfs_data
-                    WHERE perm_closure == 0 AND temp_closure == 0 AND pfs_id == ?
-                """, (station_id,))
-        return cur.fetchall()

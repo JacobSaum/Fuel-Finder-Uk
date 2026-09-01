@@ -44,13 +44,12 @@ def getStationData():
 
 # loop through stations and check if they are within the search radius
 def getNearbyStations(searchDistance, searchLatitude, searchLongitude, data_pfs):
-    validStations = []
+    validStations = {}
     for x in range (0, len(data_pfs)):
         dist = getDistBetweenTwoLocations(searchLatitude, searchLongitude, float(data_pfs[x][1]), float(data_pfs[x][2]))
         if dist <= searchDistance:
-            validStations.append(data_pfs[x][0])
+            validStations[data_pfs[x][0]] = dist
 
-    print (validStations)
     return validStations
 
 def geocodingLogic(postcode, searchRadius):
