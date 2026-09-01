@@ -2,7 +2,7 @@
 
 import sqlite3
 
-conn = sqlite3.connect("pfs_data.db")
+conn = sqlite3.connect("pfs_data.db", check_same_thread=False)
 cur = conn.cursor()
 
 LITRES_PER_GALLON = 4.54609
@@ -64,7 +64,7 @@ def sortValue(fuelType, distances, stationData, avg_mpg=40, fill_litres=40):
         effective_price = price + cost_per_litre_travel
 
         scored.append((*row, effective_price))
-        
+
     print(f"scored length: {len(scored)}")
     return sorted(scored, key=lambda r: r[-1])
 

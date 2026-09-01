@@ -2,7 +2,7 @@ import requests
 import sqlite3
 from math import radians, asin, cos, sin, sqrt
 
-conn = sqlite3.connect("pfs_data.db")
+conn = sqlite3.connect("pfs_data.db", check_same_thread=False)
 cur = conn.cursor()
 
 # returns lat and lon from postcode if valid postcode

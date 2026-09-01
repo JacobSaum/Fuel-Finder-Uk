@@ -1,6 +1,6 @@
 import sqlite3
 
-conn = sqlite3.connect("pfs_data.db")
+conn = sqlite3.connect("pfs_data.db", check_same_thread=False)
 cur = conn.cursor()
 
 # gets simplified version of data with relevant feilds

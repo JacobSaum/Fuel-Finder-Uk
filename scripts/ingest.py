@@ -2,7 +2,7 @@
 import sqlite3
 import csv
 
-conn = sqlite3.connect("pfs_data.db")
+conn = sqlite3.connect("pfs_data.db", check_same_thread=False)
 cur = conn.cursor()
 
 def readCsv():
