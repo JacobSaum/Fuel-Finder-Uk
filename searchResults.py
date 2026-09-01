@@ -1,29 +1,32 @@
 from geocoding import geocodingLogic
-from sorting import sortFuelPrice, getStationData, FUEL_COLUMNS
+from sorting_scripts.priceSorting import sortFuelPrice, getStationData, FUEL_COLUMNS
+from sorting_scripts.distanceSorting import sortDistance
+from sorting_scripts.valueSorting import sortValue
 
-def fuelSearch(fuelType, postcode, searchRadius):
-    valid_stations = geocodingLogic(postcode, searchRadius)   # {pfs_id: distance}
+def fuelSearch(fuelType, postcode, searchRadius, sortby="price"):
 
-    allStationData = getStationData()                          # (pfs_id, brand_name, e5_price, e10_price, b7s_price, b7p_price)
+    valid_stations = geocodingLogic(postcode, searchRadius)
+
+    allStationData = getStationData()               
 
     nearbyStationData = [row for row in allStationData if row[0] in valid_stations]
 
-    sortedStations = sortFuelPrice(fuelType, nearbyStationData)
+    if sortby == "price":
+        sortedStations = sortFuelPrice(fuelType, nearbyStationData)
+        results = [{"brand_name": r[1], "price": r[FUEL_COLUMNS[fuelType]],
+                    "distance": valid_stations[r[0]], "id": r[0]} for r in sortedStations]
 
-    col_index = FUEL_COLUMNS[fuelType]
+    elif sortby == "distance":
+        sortedStations = sortDistance(nearbyStationData, valid_stations)
+        results = [{"brand_name": r[1], "price": r[FUEL_COLUMNS[fuelType]],
+                    "distance": valid_stations[r[0]], "id": r[0]} for r in sortedStations]
 
-    results = []
-    for row in sortedStations:
-        station_id = row[0]
-        brand_name = row[1]
-        price = row[col_index]
-        distance = valid_stations[station_id]
+    elif sortby == "value":
+        sortedStations = sortValue(fuelType, valid_stations, nearbyStationData)
+        results = [{"brand_name": r[1], "price": r[FUEL_COLUMNS[fuelType]],
+                    "distance": valid_stations[r[0]], "id": r[0]} for r in sortedStations]
 
-        results.append({
-            "brand_name": brand_name,
-            "price": price,
-            "distance": distance
-        })
+    else: 
+        raise ValueError(f"unknown sortby option: {sortby}")
 
-    print(results)
     return results

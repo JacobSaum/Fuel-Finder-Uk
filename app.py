@@ -10,7 +10,8 @@ def home():
 
 if __name__ == "__main__":
     ingestLogic()
-    fuelSearch("e10", "AB39 8AL", 15)
+    results = fuelSearch("e10", "AB39 8AL", 15, "distance")
+    print(results)
 
     
     app.run(debug=True)

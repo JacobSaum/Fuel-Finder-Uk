@@ -40,4 +40,7 @@ def sortFuelPrice(fuelSortType, stationData):
                 continue
 
     return sorted(priced, key=lambda row: row[col_index])
+
+
+
     
