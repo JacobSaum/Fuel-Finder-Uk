@@ -1,4 +1,6 @@
 from flask import Flask, render_template
+from scripts.ingest import ingestLogic
+from geocoding import geocodingTest
 
 app = Flask(__name__)
 
@@ -7,4 +9,6 @@ def home():
     return render_template("index.html")
 
 if __name__ == "__main__":
+    ingestLogic()
+    #geocodingTest()
     app.run(debug=True)
