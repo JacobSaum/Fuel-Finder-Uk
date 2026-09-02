@@ -17,7 +17,8 @@ def getStationDetails(pfs_id):
     cur.execute("""
         SELECT pfs_id, brand_name, is24hr, postcode, address_line_1, address_line_2, city, county,
                latitude, longitude, isToilets, isCarWash, isAdBlue, isScreenwash, isWater,
-               e5_price, e10_price, b7s_price, b7p_price
+               e5_price, e10_price, b7s_price, b7p_price,
+               e5_price_updated, e10_price_updated, b7s_price_updated, b7p_price_updated
         FROM pfs_data
         WHERE pfs_id = ? AND perm_closure == 0 AND temp_closure == 0
     """, (pfs_id,))
@@ -34,6 +35,7 @@ def getStationDetails(pfs_id):
             "screenwash": bool(row[13]), "water": bool(row[14]),
         },
         "prices": {"e5": row[15], "e10": row[16], "b7s": row[17], "b7p": row[18]},
+        "prices_updated": {"e5": row[19] or None, "e10": row[20] or None, "b7s": row[21] or None, "b7p": row[22] or None},
     }
 
 def fuelSearch(fuelType, searchRadius, sortby="price", postcode=None, lat=None, lon=None, avg_mpg=40, fill_litres=40):
