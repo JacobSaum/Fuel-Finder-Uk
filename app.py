@@ -1,6 +1,6 @@
 from flask import Flask, render_template
 from scripts.ingest import ingestLogic
-from searchResults import fuelSearch
+from searchResults import fuelSearch, getStationDetails
 from flask import Flask, request, jsonify
 
 app = Flask(__name__)
@@ -35,6 +35,13 @@ def searchFuel():
         return jsonify({"error": str(e)}), 404
 
     return jsonify(results)
+
+@app.route("/station/<station_id>")
+def stationDetail(station_id):
+    details = getStationDetails(station_id)
+    if details is None:
+        return jsonify({"error": "Station not found."}), 404
+    return jsonify(details)
 
 if __name__ == "__main__":
     ingestLogic()
