@@ -4,5 +4,85 @@
 <body>
   <h1>Fuel Finder UK</h1>
   <p>Setup is working.</p>
+
+  <form id = "searchForm">
+    <label for="postcode">Postcode</label>
+    <input type="text" id="postcode" name="postcode" placeholder="e.g. AA00 A00">
+
+    <label for="fuelType">Fuel Type</label>
+    <select id="fuelType" name="fuelType">
+      <option value="e10">E10 (Standard Unleaded)</option>
+      <option value="e5">E5 (Premium Unleaded)</option>
+      <option value="b7s">B7S (Standard Deisel)</option>
+      <option value="b7p">B7P (Premium Deisel)</option>
+    </select>
+
+    <label for="searchDist">Search Radius (Miles)</label>
+    <input type="number" id="searchDist" name="searchDist" placeholder="e.g. 15">
+
+    <label for="sortBy">Sort By</label>
+    <select id="sortBy" name="sortBy">
+      <option value="price">Price (Low -> High)</option>
+      <option value="distance">Distance (Close -> Far)</option>
+      <option value="value">Effective Value (Low -> High) (beta)</option>
+    </select>
+
+    <button type="submit">Search</button>
+
+  </form>
+
+  <div id="results"></div>
+
+  <script>
+      const form = document.getElementById("searchForm");
+
+      form.addEventListener("submit", function(event) {
+        event.preventDefault();
+
+        const postcode = document.getElementById("postcode").value;
+        const fuelType = document.getElementById("fuelType").value;
+        const searchDist = document.getElementById("searchDist").value;
+        const sortBy = document.getElementById("sortBy").value;
+        
+        const params = new URLSearchParams({postcode: postcode, fuelType: fuelType, searchDist: searchDist, sortBy: sortBy});
+        const resultsDiv = document.getElementById("results");
+        resultsDiv.innerHTML = "<p>Searching...</p>";
+
+        fetch(`/fuelSearch?${params}`)
+          .then(response => response.json().then(data => ({ ok: response.ok, data })))
+          .then(({ ok, data }) => {
+            if (!ok) {
+              resultsDiv.innerHTML = `<p class="error">${data.error}</p>`;
+              return;
+            }
+
+            if (data.length === 0) {
+              resultsDiv.innerHTML = "<p>No results found.</p>";
+              return;
+            }
+
+            const rows = data.map(station => `
+              <tr>
+                <td>${station.brand_name}</td>
+                <td>${station.price}</td>
+                <td>${station.distance.toFixed(1)} mi</td>
+              </tr>
+            `).join("");
+
+            resultsDiv.innerHTML = `
+              <table>
+                <thead>
+                  <tr><th>Station</th><th>Price</th><th>Distance</th></tr>
+                </thead>
+                <tbody>${rows}</tbody>
+              </table>
+            `;
+          })
+          .catch(() => {
+            resultsDiv.innerHTML = "<p class=\"error\">Something went wrong. Please try again.</p>";
+          });
+      });
+    </script>
+
 </body>
 </html>

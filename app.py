@@ -13,10 +13,15 @@ def home():
 def searchFuel():
     fuelType = request.args.get("fuelType")
     postcode = request.args.get("postcode")
-    searchDistance = float(request.args.get("searchDistance"))
-    sortType = request.args.get("sortType")
+    searchDist = float(request.args.get("searchDist"))
+    sortBy = request.args.get("sortBy")
 
-    results = fuelSearch(fuelType, postcode, searchDistance, sortType)
+    try:
+        results = fuelSearch(fuelType, postcode, searchDist, sortBy)
+    except ValueError as e:
+        return jsonify({"error": str(e)}), 400
+    except LookupError as e:
+        return jsonify({"error": str(e)}), 404
 
     return jsonify(results)
 
