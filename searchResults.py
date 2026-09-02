@@ -8,7 +8,7 @@ def isValidPostcode(postcode):
     pattern = r"^[A-Z]{1,2}\d[A-Z\d]?\s?\d[A-Z]{2}$"
     return bool(re.match(pattern, postcode.strip().upper()))
 
-def fuelSearch(fuelType, searchRadius, sortby="price", postcode=None, lat=None, lon=None):
+def fuelSearch(fuelType, searchRadius, sortby="price", postcode=None, lat=None, lon=None, avg_mpg=40, fill_litres=40):
 
     if postcode is not None:
         if isValidPostcode(postcode) == False:
@@ -34,9 +34,10 @@ def fuelSearch(fuelType, searchRadius, sortby="price", postcode=None, lat=None, 
                     "distance": valid_stations[r[0]], "id": r[0]} for r in sortedStations]
 
     elif sortby == "value":
-        sortedStations = sortValue(fuelType, valid_stations, nearbyStationData)
+        sortedStations = sortValue(fuelType, valid_stations, nearbyStationData, avg_mpg=avg_mpg, fill_litres=fill_litres)
         results = [{"brand_name": r[1], "price": r[FUEL_COLUMNS[fuelType]],
-                    "distance": valid_stations[r[0]], "id": r[0]} for r in sortedStations]
+                    "distance": valid_stations[r[0]], "id": r[0],
+                    "fill_cost": round(r[-1] * fill_litres / 100, 2)} for r in sortedStations]
 
     else: 
         raise ValueError(f"unknown sortby option: {sortby}")

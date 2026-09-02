@@ -118,6 +118,16 @@ select.pill {
 .input:hover { border-color: var(--color-neutral-500); }
 .input:focus-visible { border-color: var(--color-accent); }
 
+/* — value-sort inputs — */
+.value-row { padding: 0 var(--space-3) var(--space-3); display: flex; gap: 8px; }
+.value-row[hidden] { display: none; }
+.pill-value { flex: 1; justify-content: space-between; }
+.pill-value span { color: var(--color-neutral-600); font-weight: 600; font-size: 12px; }
+.pill-value input {
+  width: 48px; border: none; background: transparent; font: inherit; color: inherit;
+  padding: 0; text-align: right;
+}
+
 .location-status {
   padding: 0 var(--space-3) var(--space-3); font-size: 12px; color: var(--color-neutral-700);
   text-align: center;
@@ -141,6 +151,7 @@ select.pill {
 .result-main { flex: 1; min-width: 0; }
 .result-brand { font-weight: 600; font-size: 14px; }
 .result-meta { font-size: 12px; color: var(--color-neutral-700); margin-top: 2px; }
+.result-fill { font-size: 11px; color: var(--color-accent-700); margin-top: 3px; font-weight: 600; }
 .result-price {
   font-family: var(--font-heading); font-weight: 800; font-size: 20px;
   text-align: right; flex: none; white-space: nowrap;
@@ -155,6 +166,15 @@ select.pill {
 
 .state-msg { padding: var(--space-6) var(--space-3); text-align: center; color: var(--color-neutral-700); font-size: 14px; }
 .state-msg.error { color: var(--color-accent-700); }
+
+.btn-load {
+  display: block; width: 100%; margin-top: var(--space-1);
+  padding: 12px; border: 1px solid var(--color-divider); background: var(--color-neutral-100);
+  font-family: var(--font-heading); font-weight: 700; font-size: 13px; color: var(--color-text);
+  cursor: pointer;
+}
+.btn-load:hover { background: var(--color-neutral-200); }
+.btn-load:active { background: var(--color-neutral-300); }
 </style>
 </head>
 <body>
@@ -176,8 +196,8 @@ select.pill {
 
   <div class="filter-bar" id="filterBar">
     <div class="seg seg-full" id="locationSeg">
-      <label class="seg-opt"><input type="radio" name="locationType" value="current"><span>📍 Current</span></label>
-      <label class="seg-opt"><input type="radio" name="locationType" value="postcode" checked><span>Postcode</span></label>
+      <label class="seg-opt"><input type="radio" name="locationType" value="current" checked><span>📍 Current</span></label>
+      <label class="seg-opt"><input type="radio" name="locationType" value="postcode"><span>Postcode</span></label>
     </div>
 
     <select class="pill" id="fuelType">
@@ -198,8 +218,13 @@ select.pill {
     </select>
   </div>
 
-  <div class="postcode-row" id="postcodeRow">
+  <div class="postcode-row" id="postcodeRow" hidden>
     <input class="input" type="text" id="postcode" placeholder="e.g. CB1 1AA" autocomplete="postal-code">
+  </div>
+
+  <div class="value-row" id="valueRow" hidden>
+    <label class="pill pill-value"><span>Avg MPG</span><input type="number" id="avgMpg" value="40" min="5" max="150"></label>
+    <label class="pill pill-value"><span>Fill (L)</span><input type="number" id="fillLitres" value="40" min="5" max="120"></label>
   </div>
 
   <div class="location-status" id="locationStatus"></div>
@@ -213,8 +238,17 @@ select.pill {
   const postcodeRow = document.getElementById("postcodeRow");
   const postcodeInput = document.getElementById("postcode");
   const locationSeg = document.getElementById("locationSeg");
+  const sortBySelect = document.getElementById("sortBy");
+  const valueRow = document.getElementById("valueRow");
+  const avgMpgInput = document.getElementById("avgMpg");
+  const fillLitresInput = document.getElementById("fillLitres");
 
   let currentCoords = null;
+
+  const PAGE_SIZE = 10;
+  let allResults = [];
+  let visibleCount = 0;
+  let currentSortBy = "price";
 
   function selectedRadio(name) {
     const el = document.querySelector(`input[name="${name}"]:checked`);
@@ -261,8 +295,15 @@ select.pill {
     });
   });
 
+  function updateValueRowVisibility() {
+    valueRow.hidden = sortBySelect.value !== "value";
+  }
+
   document.getElementById("fuelType").addEventListener("change", performSearch);
-  document.getElementById("sortBy").addEventListener("change", performSearch);
+  sortBySelect.addEventListener("change", () => {
+    updateValueRowVisibility();
+    performSearch();
+  });
 
   let debounceTimer;
   function debouncedSearch() {
@@ -271,6 +312,8 @@ select.pill {
   }
   postcodeInput.addEventListener("input", debouncedSearch);
   document.getElementById("searchDist").addEventListener("input", debouncedSearch);
+  avgMpgInput.addEventListener("input", debouncedSearch);
+  fillLitresInput.addEventListener("input", debouncedSearch);
 
   function formatPrice(price) {
     return Number(price).toFixed(1);
@@ -278,9 +321,15 @@ select.pill {
 
   function performSearch() {
     const locationType = selectedRadio("locationType");
+    const sortBy = sortBySelect.value;
     const params = { fuelType: document.getElementById("fuelType").value,
                       searchDist: document.getElementById("searchDist").value,
-                      sortBy: document.getElementById("sortBy").value };
+                      sortBy };
+
+    if (sortBy === "value") {
+      params.avgMpg = avgMpgInput.value;
+      params.fillLitres = fillLitresInput.value;
+    }
 
     if (locationType === "current") {
       if (!currentCoords) return;
@@ -309,24 +358,48 @@ select.pill {
           return;
         }
 
-        const sortBy = params.sortBy;
-        const bestLabel = sortBy === "distance" ? "Nearest" : sortBy === "value" ? "Best value" : "Cheapest";
-
-        resultsDiv.innerHTML = data.map((station, i) => `
-          <div class="result-card ${i === 0 ? "is-best" : ""}">
-            <div class="result-rank">${i + 1}</div>
-            <div class="result-main">
-              <div class="result-brand">${station.brand_name}${i === 0 ? `<span class="tag-best">${bestLabel}</span>` : ""}</div>
-              <div class="result-meta">${station.distance.toFixed(1)} mi away</div>
-            </div>
-            <div class="result-price">${formatPrice(station.price)}<small>p/L</small></div>
-          </div>
-        `).join("");
+        currentSortBy = params.sortBy;
+        allResults = data;
+        visibleCount = Math.min(PAGE_SIZE, allResults.length);
+        renderResults();
       })
       .catch(() => {
         resultsDiv.innerHTML = '<p class="state-msg error">Something went wrong. Please try again.</p>';
       });
   }
+
+  function renderResults() {
+    const bestLabel = currentSortBy === "distance" ? "Nearest" : currentSortBy === "value" ? "Best value" : "Cheapest";
+    const visible = allResults.slice(0, visibleCount);
+
+    const cards = visible.map((station, i) => `
+      <div class="result-card ${i === 0 ? "is-best" : ""}">
+        <div class="result-rank">${i + 1}</div>
+        <div class="result-main">
+          <div class="result-brand">${station.brand_name}${i === 0 ? `<span class="tag-best">${bestLabel}</span>` : ""}</div>
+          <div class="result-meta">${station.distance.toFixed(1)} mi away</div>
+          ${currentSortBy === "value" && station.fill_cost != null ? `<div class="result-fill">~£${station.fill_cost.toFixed(2)} to fill up, drive there included</div>` : ""}
+        </div>
+        <div class="result-price">${formatPrice(station.price)}<small>p/L</small></div>
+      </div>
+    `).join("");
+
+    const loadMore = visibleCount < allResults.length
+      ? `<button type="button" class="btn-load" id="loadMoreBtn">Load more (${allResults.length - visibleCount} left)</button>`
+      : "";
+
+    resultsDiv.innerHTML = cards + loadMore;
+  }
+
+  resultsDiv.addEventListener("click", (e) => {
+    if (e.target.closest("#loadMoreBtn")) {
+      visibleCount = Math.min(visibleCount + PAGE_SIZE, allResults.length);
+      renderResults();
+    }
+  });
+
+  updateValueRowVisibility();
+  useCurrentLocation();
 </script>
 
 </body>
