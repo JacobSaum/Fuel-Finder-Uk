@@ -73,6 +73,6 @@ def fuelSearch(fuelType, searchRadius, sortby="price", postcode=None, lat=None, 
         raise ValueError(f"unknown sortby option: {sortby}")
 
     if len(results) == 0:
-        raise LookupError(f"No Petrol Stations Within Search Radius.")
+        raise LookupError("No Petrol Stations Within Search Radius.")
 
     return results

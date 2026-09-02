@@ -1,7 +1,8 @@
-from flask import Flask, render_template
-from scripts.ingest import ingestLogic
+import sys
+from flask import Flask, render_template, request, jsonify
+from scripts.ingest import ensureSchema, readCsv
+from scripts.fuelFinderApi import syncFuelFinderData, isConfigured
 from searchResults import fuelSearch, getStationDetails
-from flask import Flask, request, jsonify
 
 app = Flask(__name__)
 
@@ -44,8 +45,20 @@ def stationDetail(station_id):
     return jsonify(details)
 
 if __name__ == "__main__":
-    ingestLogic()
+    ensureSchema()
 
+    try:
+        if isConfigured():
+            try:
+                syncFuelFinderData()
+            except Exception as e:
+                print(f"[fuelFinderApi] live sync failed ({e}) — falling back to fuelData.csv")
+                readCsv()
+        else:
+            print("[fuelFinderApi] not configured (set FUEL_FINDER_API_BASE_URL / FUEL_FINDER_TOKEN_URL in .env) — using fuelData.csv")
+            readCsv()
+    except KeyboardInterrupt:
+        print("\n[app] startup interrupted — exiting.")
+        sys.exit(0)
 
-    
     app.run(debug=True)

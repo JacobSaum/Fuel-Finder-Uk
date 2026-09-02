@@ -48,8 +48,7 @@ def printFirstRows():
 
 
 
-def ingestLogic():
-
+def ensureSchema():
     cur.execute("""
         CREATE TABLE IF NOT EXISTS pfs_data (
             pfs_id TEXT PRIMARY KEY,
@@ -78,13 +77,14 @@ def ingestLogic():
             b7s_price_updated TEXT,
             b7p_price_updated TEXT
         )
-        
+
     """)
 
     conn.commit()
 
+def ingestLogic():
+    ensureSchema()
     readCsv()
-
     conn.close()
 
         
