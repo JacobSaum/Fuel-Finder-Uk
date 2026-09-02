@@ -12,12 +12,18 @@ def home():
 @app.route("/fuelSearch")
 def searchFuel():
     fuelType = request.args.get("fuelType")
-    postcode = request.args.get("postcode")
     searchDist = float(request.args.get("searchDist"))
     sortBy = request.args.get("sortBy")
+    locationType = request.args.get("locationType", "postcode")
 
     try:
-        results = fuelSearch(fuelType, postcode, searchDist, sortBy)
+        if locationType == "coords":
+            lat = float(request.args.get("lat"))
+            lon = float(request.args.get("lon"))
+            results = fuelSearch(fuelType, searchDist, sortBy, lat=lat, lon=lon)
+        else:
+            postcode = request.args.get("postcode")
+            results = fuelSearch(fuelType, searchDist, sortBy, postcode=postcode)
     except ValueError as e:
         return jsonify({"error": str(e)}), 400
     except LookupError as e:

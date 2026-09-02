@@ -13,7 +13,7 @@ def getLocationFromPostcode(postcode):
         lat, lon = getLongAndLat(pfs_data)
         return lat, lon
     
-    return None, None, None
+    return None, None
 
 # gets lon and lat from postcode
 def getLongAndLat(pfs_data):
@@ -54,6 +54,13 @@ def getNearbyStations(searchDistance, searchLatitude, searchLongitude, data_pfs)
 
 def geocodingLogic(postcode, searchRadius):
     searchLatitude, searchLongitude = getLocationFromPostcode(postcode)
+    if searchLatitude is None or searchLongitude is None:
+        raise LookupError(f"Could not find location for postcode {postcode}.")
+    stationData = getStationData()
+    return getNearbyStations(searchRadius, searchLatitude, searchLongitude, stationData)
+
+# same as geocodingLogic but using coordinates directly (eg. browser geolocation)
+def geocodingLogicFromCoords(searchLatitude, searchLongitude, searchRadius):
     stationData = getStationData()
     return getNearbyStations(searchRadius, searchLatitude, searchLongitude, stationData)
 

@@ -1,4 +1,4 @@
-from geocoding import geocodingLogic
+from geocoding import geocodingLogic, geocodingLogicFromCoords
 from sorting_scripts.priceSorting import sortFuelPrice, getStationData, FUEL_COLUMNS
 from sorting_scripts.distanceSorting import sortDistance
 from sorting_scripts.valueSorting import sortValue
@@ -8,12 +8,16 @@ def isValidPostcode(postcode):
     pattern = r"^[A-Z]{1,2}\d[A-Z\d]?\s?\d[A-Z]{2}$"
     return bool(re.match(pattern, postcode.strip().upper()))
 
-def fuelSearch(fuelType, postcode, searchRadius, sortby="price"):
+def fuelSearch(fuelType, searchRadius, sortby="price", postcode=None, lat=None, lon=None):
 
-    if isValidPostcode(postcode) == False:
-        raise ValueError(f"{postcode} is not a valid postcode.")
-
-    valid_stations = geocodingLogic(postcode, searchRadius)
+    if postcode is not None:
+        if isValidPostcode(postcode) == False:
+            raise ValueError(f"{postcode} is not a valid postcode.")
+        valid_stations = geocodingLogic(postcode, searchRadius)
+    elif lat is not None and lon is not None:
+        valid_stations = geocodingLogicFromCoords(lat, lon, searchRadius)
+    else:
+        raise ValueError("A postcode or current location is required.")
 
     allStationData = getStationData()               
 
@@ -25,7 +29,7 @@ def fuelSearch(fuelType, postcode, searchRadius, sortby="price"):
                     "distance": valid_stations[r[0]], "id": r[0]} for r in sortedStations]
 
     elif sortby == "distance":
-        sortedStations = sortDistance(nearbyStationData, valid_stations)
+        sortedStations = sortDistance(nearbyStationData, valid_stations, fuelType)
         results = [{"brand_name": r[1], "price": r[FUEL_COLUMNS[fuelType]],
                     "distance": valid_stations[r[0]], "id": r[0]} for r in sortedStations]
 
