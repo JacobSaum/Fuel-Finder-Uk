@@ -1,3 +1,20 @@
+const THEME_KEY = "fyll-theme";
+const themeToggle = document.getElementById("themeToggle");
+
+function getSystemTheme() {
+  return window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
+}
+
+function getEffectiveTheme() {
+  return document.documentElement.getAttribute("data-theme") || getSystemTheme();
+}
+
+themeToggle.addEventListener("click", () => {
+  const next = getEffectiveTheme() === "dark" ? "light" : "dark";
+  document.documentElement.setAttribute("data-theme", next);
+  try { localStorage.setItem(THEME_KEY, next); } catch (e) {}
+});
+
 const resultsDiv = document.getElementById("results");
 const locationStatus = document.getElementById("locationStatus");
 const postcodeRow = document.getElementById("postcodeRow");

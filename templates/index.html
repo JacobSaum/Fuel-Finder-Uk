@@ -4,7 +4,18 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>FYLL — Find the cheapest fuel nearby</title>
-<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Cpath d='M10 20 L18 12 H52 V58 H10 Z' fill='%23201e1d'/%3E%3Crect x='42' y='6' width='10' height='6' fill='%23201e1d'/%3E%3Crect x='10' y='48' width='42' height='10' fill='%23ec3013'/%3E%3Crect x='22' y='18' width='8' height='26' fill='%23f3f2f2'/%3E%3Crect x='22' y='18' width='20' height='8' fill='%23f3f2f2'/%3E%3Crect x='22' y='29' width='14' height='8' fill='%23f3f2f2'/%3E%3C/svg%3E">
+<script>
+(function () {
+  try {
+    var saved = localStorage.getItem("fyll-theme");
+    if (saved === "light" || saved === "dark") {
+      document.documentElement.setAttribute("data-theme", saved);
+    }
+  } catch (e) {}
+})();
+</script>
+<link rel="icon" media="(prefers-color-scheme: light)" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Cpath d='M10 20 L18 12 H52 V58 H10 Z' fill='%23201e1d'/%3E%3Crect x='42' y='6' width='10' height='6' fill='%23201e1d'/%3E%3Crect x='10' y='48' width='42' height='10' fill='%23ec3013'/%3E%3Crect x='22' y='18' width='8' height='26' fill='%23f3f2f2'/%3E%3Crect x='22' y='18' width='20' height='8' fill='%23f3f2f2'/%3E%3Crect x='22' y='29' width='14' height='8' fill='%23f3f2f2'/%3E%3C/svg%3E">
+<link rel="icon" media="(prefers-color-scheme: dark)" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Cpath d='M10 20 L18 12 H52 V58 H10 Z' fill='%23f3f2f2'/%3E%3Crect x='42' y='6' width='10' height='6' fill='%23f3f2f2'/%3E%3Crect x='10' y='48' width='42' height='10' fill='%23ec3013'/%3E%3Crect x='22' y='18' width='8' height='26' fill='%23171412'/%3E%3Crect x='22' y='18' width='20' height='8' fill='%23171412'/%3E%3Crect x='22' y='29' width='14' height='8' fill='%23171412'/%3E%3C/svg%3E">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;600;800&display=swap" rel="stylesheet">
@@ -16,15 +27,24 @@
   <header class="nav">
     <div class="nav-brand">
       <svg width="22" height="22" viewBox="0 0 64 64" aria-hidden="true">
-        <path d="M10 20 L18 12 H52 V58 H10 Z" fill="#201e1d"></path>
-        <rect x="42" y="6" width="10" height="6" fill="#201e1d"></rect>
-        <rect x="10" y="48" width="42" height="10" fill="#ec3013"></rect>
-        <rect x="22" y="18" width="8" height="26" fill="#f3f2f2"></rect>
-        <rect x="22" y="18" width="20" height="8" fill="#f3f2f2"></rect>
-        <rect x="22" y="29" width="14" height="8" fill="#f3f2f2"></rect>
+        <path class="mark-body" d="M10 20 L18 12 H52 V58 H10 Z"></path>
+        <rect class="mark-body" x="42" y="6" width="10" height="6"></rect>
+        <rect class="mark-band" x="10" y="48" width="42" height="10"></rect>
+        <rect class="mark-cutout" x="22" y="18" width="8" height="26"></rect>
+        <rect class="mark-cutout" x="22" y="18" width="20" height="8"></rect>
+        <rect class="mark-cutout" x="22" y="29" width="14" height="8"></rect>
       </svg>
       FYLL
     </div>
+    <button type="button" class="theme-toggle" id="themeToggle" aria-label="Toggle dark mode">
+      <svg class="icon-moon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79Z"></path>
+      </svg>
+      <svg class="icon-sun" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <circle cx="12" cy="12" r="4"></circle>
+        <path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"></path>
+      </svg>
+    </button>
   </header>
 
   <div class="filter-bar" id="filterBar">

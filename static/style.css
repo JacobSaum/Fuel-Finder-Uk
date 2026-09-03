@@ -26,9 +26,77 @@
   --space-1: 4px; --space-2: 8px; --space-3: 12px; --space-4: 16px; --space-6: 24px;
   --shadow-sm: 0 1px 2px color-mix(in srgb, #201e1d 14%, transparent);
   --shadow-md: 0 3px 10px color-mix(in srgb, #201e1d 16%, transparent);
+
+  color-scheme: light;
+}
+
+/* — dark mode: system preference by default, [data-theme] overrides it — */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --color-bg: #171412;
+    --color-surface: #201e1d;
+    --color-text: #f3f0ed;
+
+    --color-neutral-100: #232020;
+    --color-neutral-200: #2d2a29;
+    --color-neutral-300: #3a3635;
+    --color-neutral-400: #4d4846;
+    --color-neutral-500: #6b6663;
+    --color-neutral-600: #8a8582;
+    --color-neutral-700: #ada7a3;
+    --color-neutral-800: #d6d0cb;
+
+    --color-accent-100: #3a140d;
+    --color-accent-600: #ff5030;
+    --color-accent-700: #ff6b4a;
+    --color-accent-800: #ffb59f;
+
+    --color-divider: color-mix(in srgb, #f3f0ed 14%, transparent);
+
+    --shadow-sm: 0 1px 2px color-mix(in srgb, black 35%, transparent);
+    --shadow-md: 0 3px 10px color-mix(in srgb, black 45%, transparent);
+
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --color-bg: #171412;
+  --color-surface: #201e1d;
+  --color-text: #f3f0ed;
+
+  --color-neutral-100: #232020;
+  --color-neutral-200: #2d2a29;
+  --color-neutral-300: #3a3635;
+  --color-neutral-400: #4d4846;
+  --color-neutral-500: #6b6663;
+  --color-neutral-600: #8a8582;
+  --color-neutral-700: #ada7a3;
+  --color-neutral-800: #d6d0cb;
+
+  --color-accent-100: #3a140d;
+  --color-accent-600: #ff5030;
+  --color-accent-700: #ff6b4a;
+  --color-accent-800: #ffb59f;
+
+  --color-divider: color-mix(in srgb, #f3f0ed 14%, transparent);
+
+  --shadow-sm: 0 1px 2px color-mix(in srgb, black 35%, transparent);
+  --shadow-md: 0 3px 10px color-mix(in srgb, black 45%, transparent);
+
+  color-scheme: dark;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) select.pill {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0 L5 6 L10 0 Z' fill='%23f3f0ed'/%3E%3C/svg%3E");
+  }
+}
+:root[data-theme="dark"] select.pill {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0 L5 6 L10 0 Z' fill='%23f3f0ed'/%3E%3C/svg%3E");
 }
 
 * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+*, *::before, *::after { transition: background-color 150ms ease, color 150ms ease, border-color 150ms ease; }
 html, body { height: 100%; }
 body {
   margin: 0; background: var(--color-bg); color: var(--color-text);
@@ -46,7 +114,7 @@ a { color: var(--color-accent); }
 }
 
 .nav {
-  display: flex; align-items: center; justify-content: center; gap: var(--space-2);
+  display: flex; align-items: center; justify-content: space-between; gap: var(--space-2);
   padding: var(--space-3) var(--space-4);
   border-bottom: 2px solid var(--color-divider);
 }
@@ -55,6 +123,27 @@ a { color: var(--color-accent); }
   font-family: var(--font-heading); font-weight: 800;
   font-size: 18px; letter-spacing: 0.06em;
 }
+.mark-body { fill: var(--color-text); }
+.mark-band { fill: var(--color-accent); }
+.mark-cutout { fill: var(--color-bg); }
+
+.theme-toggle {
+  display: flex; align-items: center; justify-content: center; flex: none;
+  width: 34px; height: 34px; padding: 0;
+  background: var(--color-neutral-100); border: 1px solid var(--color-divider);
+  color: var(--color-text); cursor: pointer;
+}
+.theme-toggle:hover { background: var(--color-neutral-200); }
+.theme-toggle svg { display: block; }
+.theme-toggle .icon-sun { display: none; }
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) .theme-toggle .icon-sun { display: block; }
+  :root:not([data-theme="light"]) .theme-toggle .icon-moon { display: none; }
+}
+:root[data-theme="dark"] .theme-toggle .icon-sun { display: block; }
+:root[data-theme="dark"] .theme-toggle .icon-moon { display: none; }
+:root[data-theme="light"] .theme-toggle .icon-sun { display: none; }
+:root[data-theme="light"] .theme-toggle .icon-moon { display: block; }
 
 /* — filter bar: every control visible, no scrolling required — */
 .filter-bar {
